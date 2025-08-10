@@ -1,0 +1,31 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load image
+img = cv2.imread("rice_leaf.jpg", cv2.IMREAD_GRAYSCALE)
+
+# Compute gradients (Sobel filter)
+grad_x = cv2.Sobel(img, cv2.CV_32F, 1, 0, ksize=3)
+grad_y = cv2.Sobel(img, cv2.CV_32F, 0, 1, ksize=3)
+
+# Compute magnitude and angle
+magnitude, angle = cv2.cartToPolar(grad_x, grad_y, angleInDegrees=True)
+
+# Normalize magnitude for visualization
+magnitude = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)
+
+# Create HSV image (H=angle, S=255, V=magnitude)
+hsv = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
+hsv[..., 0] = np.uint8(angle / 2)      # Hue: direction
+hsv[..., 1] = 255                      # Saturation
+hsv[..., 2] = np.uint8(magnitude)      # Value: gradient strength
+
+# Convert HSV to BGR for display
+flow_map = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+# Show result
+plt.imshow(flow_map)
+plt.title("Pixel Flow Map from Static Image")
+plt.axis("off")
+plt.show()
